@@ -246,7 +246,7 @@ Route::post('/coupon-apply', [CartController::class, 'CouponApply']);
 Route::get('/coupon-calculation', [CartController::class, 'CouponCalculation']);
 Route::get('/coupon-remove', [CartController::class, 'CouponRemove']);
 
-//checkout route
+//checkout route 1
 Route::get('/checkout', [CartController::class, 'CheckoutCreate'])->name('checkout');
 Route::get('/district-get/ajax/{division_id}', [CheckoutController::class, 'GetDistrictAjax']);
 Route::get('/state-get/ajax/{district_id}', [CheckoutController::class, 'GetStateAjax']);
