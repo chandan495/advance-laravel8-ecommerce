@@ -16,7 +16,7 @@ use App\Models\User;
 use App\Http\Controllers\User\CartPageController;
 use App\Http\Controllers\Backend\CouponController;
 use App\Http\Controllers\Backend\ShippingAreaController;
-
+use App\Http\Controllers\User\CheckoutController;
 
 
 /*
@@ -244,3 +244,10 @@ Route::prefix('shipping')->group(function(){
 
 Route::post('/coupon-apply', [CartController::class, 'CouponApply']);
 Route::get('/coupon-calculation', [CartController::class, 'CouponCalculation']);
+Route::get('/coupon-remove', [CartController::class, 'CouponRemove']);
+
+//checkout route
+Route::get('/checkout', [CartController::class, 'CheckoutCreate'])->name('checkout');
+Route::get('/district-get/ajax/{division_id}', [CheckoutController::class, 'GetDistrictAjax']);
+Route::get('/state-get/ajax/{district_id}', [CheckoutController::class, 'GetStateAjax']);
+Route::post('/checkout/store', [CheckoutController::class, 'CheckoutStore'])->name('checkout-store');

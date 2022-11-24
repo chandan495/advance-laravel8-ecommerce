@@ -325,8 +325,10 @@ function minicartRemove(rowId){
             url: '/minicart/product-remove/'+rowId,
             dataType:'json',
             success:function(data){
+              CalFiledCalculation();
               MiniCart();
               cart();
+              $('#couponcalfield1').show();
              // Start Message 
                 const Toast = Swal.mixin({
                       toast: true,
@@ -641,6 +643,7 @@ function cartincrease(rowId){
     url:'/cart-increament/'+rowId,
     dataType:'json',
     success:function(data){
+      CalFiledCalculation();
       MiniCart();
       cart();
       // Start Message 
@@ -677,6 +680,7 @@ function cartdecrease(rowId){
     url:'/cart-decrement/'+rowId,
     dataType:'json',
     success:function(data){
+      CalFiledCalculation();
       MiniCart();
       cart();
       // Start Message 
@@ -732,7 +736,7 @@ function cartdecrease(rowId){
 //                     })
 //                 }
 //                 // End Message 
-function applycoupon1(){
+function applyCoupon(){
  //alert("tesing");
   var coupon_name = $('#coupon_name').val();
  
@@ -743,7 +747,8 @@ function applycoupon1(){
         data: {coupon_name:coupon_name},
         url: "{{ url('/coupon-apply') }}",
         success:function(data){
-
+          CalFiledCalculation();
+          $('#couponcalfield1').hide();
           // Start Message 
       const Toast = Swal.mixin({
                       toast: true,
@@ -785,7 +790,7 @@ function CalFiledCalculation(){
 					<div class="cart-sub-total">
 						Subtotal<span class="inner-left-md">$ ${data.total}</span>
 					</div>
-					<div class="cart-grand-total">
+					<div class="cart-grand-total" style="color:#5cb85c;font-weight:bold;">
 						Grand Total<span class="inner-left-md">$ ${data.total}</span>
 					</div>
 				</th>
@@ -801,12 +806,12 @@ function CalFiledCalculation(){
 					</div>
           <div class="cart-sub-total">
 						Applied Coupon<span class="inner-left-md"> ${data.coupon_name}</span>
-            <button type="submit"><i class="fa fa-times"></i></button>
+            <button type="submit" onclick="couponRemove()"><i class="fa fa-times"></i></button>
 					</div>
           <div class="cart-sub-total">
 						Total Discount<span class="inner-left-md">$ ${data.discount_amount}</span>
 					</div>
-					<div class="cart-grand-total">
+					<div class="cart-grand-total" style="color:#5cb85c;font-weight:bold;">
 						Grand Total<span class="inner-left-md">$ ${data.total_amount}</span>
 					</div>
 				</th>
@@ -816,6 +821,44 @@ function CalFiledCalculation(){
   });
 }
 CalFiledCalculation();
+</script>
+
+<script>
+function couponRemove(){
+  $.ajax({
+    type:'get',
+    url:"{{ url('/coupon-remove') }}",
+    dataType:'json',
+    success:function(data){
+      CalFiledCalculation();
+      $('#couponcalfield1').show();
+      $('#coupon_name').val('');
+       // Start Message 
+       const Toast = Swal.mixin({
+                      toast: true,
+                      position: 'top-end',
+                      icon: 'success',
+                      showConfirmButton: false,
+                      timer: 3000
+                    })
+                if ($.isEmptyObject(data.error)) {
+                    Toast.fire({
+                        type: 'success',
+                        icon: 'success',
+                        title: data.success
+                    })
+                }else{
+                    Toast.fire({
+                        type: 'error',
+                        icon: 'error',
+                        title: data.error
+                    })
+                }
+                // End Message 
+    }
+  });
+}
+//couponRemove();
 </script>
 </body>
 </html>

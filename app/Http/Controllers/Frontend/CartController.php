@@ -9,6 +9,7 @@ use Gloudemans\Shoppingcart\Facades\Cart;
 use Auth;
 use App\Models\Wishlist;
 use App\Models\Coupon;
+use App\Models\ShipDivision;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 
@@ -16,6 +17,9 @@ use Illuminate\Support\Facades\Session;
 class CartController extends Controller
 {
     public function AddToCart(Request $request, $id){
+        if(Session::has('coupon')){
+            Session::forget('coupon');
+        }
         $product = Product::findOrFail($id);
 
         if($product->discount_price == NULL){
@@ -75,7 +79,10 @@ class CartController extends Controller
     // 	));
     }
     public function RemoveMiniCart($rowId){
-    	Cart::remove($rowId);
+        Cart::remove($rowId);
+        if(Session::has('coupon')){
+            Session::forget('coupon');
+        }
     	return response()->json(['success' => 'Product Remove from Cart']);
 
     } // end mehtod 
@@ -105,15 +112,21 @@ class CartController extends Controller
         $coupon = Coupon::where('coupon_name', $request->coupon_name)->where('coupon_validity','>=',Carbon::now()->format('Y-m-d'))->first();
 
         if($coupon){
-
-            Session::put('coupon',[
-
+            $total = (int)str_replace(',','',Cart::total());
+            Session::put('coupon', [
                 'coupon_name' => $coupon->coupon_name,
                 'coupon_discount' => $coupon->coupon_discount,
-                'discount_amount' => round(Cart::total() * $coupon->coupon_discount / 100),
-                'total_amount' => round(Cart::total() - Cart::total() * $coupon->coupon_discount / 100),
+                'discount_amount' => round($total * $coupon->coupon_discount/100),
+                'total_amount' => round($total - $total * $coupon->coupon_discount/100)
+                ]);
+            // Session::put('coupon',[
 
-            ]);
+            //     'coupon_name' => $coupon->coupon_name,
+            //     'coupon_discount' => $coupon->coupon_discount,
+            //     'discount_amount' => Cart::total() * $coupon->coupon_discount / 100,
+            //     'total_amount' => Cart::total() - Cart::total() * $coupon->coupon_discount / 100,
+
+            // ]);
             return response()->json(array(
                 'success' => 'Applied to coupon'
             ));
@@ -137,6 +150,40 @@ class CartController extends Controller
             return response()->json(array(
                 'total' => Cart::total()
             ));
+        }
+    }
+    public function CouponRemove(){
+        Session::forget('coupon');
+        return response()->json([
+            'success' => "Coupon Removed Successfully"
+        ]);
+    }
+
+    public function CheckoutCreate(){
+        if(Auth::check()){
+            if(Cart::total() > 0){
+        $carts = Cart::content();
+    	$cartQty = Cart::count();
+        $cartTotal = Cart::total();
+        
+        $divisions = ShipDivision::orderBy('division_name','ASC')->get();
+
+                return view('frontend.checkout.checkout_view',compact('carts','cartQty','cartTotal','divisions'));
+            }
+            else{
+                $notification = array(
+                    'message' => 'You need add one or more product to use this process',
+                    'alert_type' => 'error'
+                );
+                return redirect()->to('/')->with($notification);
+            }
+        }
+        else{
+            $notification = array(
+                'message' => 'You need to login first',
+                'alert_type' => 'error'
+            );
+            return redirect()->route('login')->with($notification);
         }
     }
     

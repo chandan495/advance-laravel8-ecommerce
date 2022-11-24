@@ -52,7 +52,7 @@ My Cart
 @if(Session::has('coupon'))
 
 @else
-<table class="table">
+<table class="table" id="couponcalfield1">
 		<thead>
 			<tr>
 				<th>
@@ -68,7 +68,7 @@ My Cart
 			<input type="text" class="form-control unicase-form-control text-input" placeholder="You Coupon.." id="coupon_name">
 		</div>
 		<div class="clearfix pull-right">
-			<button type="submit" onclick="applycoupon1()" class="btn-upper btn btn-primary">APPLY COUPON</button>
+			<button type="submit" onclick="applyCoupon()" class="btn-upper btn btn-primary">APPLY COUPON</button>
 		</div>
 					</td>
 				</tr>
@@ -89,7 +89,7 @@ My Cart
 				<tr>
 					<td>
 						<div class="cart-checkout-btn pull-right">
-							<button type="submit" class="btn btn-primary checkout-btn">PROCCED TO CHEKOUT</button>
+							<a href="{{ route('checkout') }}" type="submit" class="btn btn-primary checkout-btn">PROCCED TO CHEKOUT</a>
 							
 						</div>
 					</td>
