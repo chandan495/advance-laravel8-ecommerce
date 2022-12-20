@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\ShipDivision;
 use App\Models\ShipDistrict;
 use App\Models\ShipState;
+use Gloudemans\Shoppingcart\Facades\Cart;
+use Illuminate\Support\Facades\Session;
 
 class CheckoutController extends Controller
 {
@@ -31,10 +33,38 @@ class CheckoutController extends Controller
         $data['division_id'] = $request->division_id;
         $data['district_id'] = $request->district_id;
         $data['state_id'] = $request->state_id;
-
-
+        $cartTotal = Cart::total();
+        
         if($request->payment_method == 'Stripe'){
-            return view('frontend.payment.stripe',compact('data'));
+
+            if (Session::has('coupon')) {
+                $total_amount = Session::get('coupon')['total_amount'];
+            }else{
+                $total_amount = round(Cart::total());
+            }
+
+            // Enter Your Stripe Secret
+        \Stripe\Stripe::setApiKey('sk_test_51M8oq8SB1S7K6NZ75YYJuRWWSoxwQpKpScUrnnusxRX9cvoBJm72JGxOTnBcVXkDUsRyrFZrgFN8k4wHgEeN7LqP00qIWhwfaO');
+        		
+		$amount = $total_amount;
+		$amount *= 100;
+        $amount = (int) $amount;
+        
+        $payment_intent = \Stripe\PaymentIntent::create([
+			'description' => 'Stripe Test Payment doing chandan',
+			'amount' => $amount,
+			'currency' => 'INR',
+			'description' => 'Payment From Chandan kumar',
+            'payment_method_types' => ['card'],
+            'metadata' => ['order_id' => uniqid()],
+		]);
+        $intent = $payment_intent->client_secret;
+        $payment_type = 'Card';
+        $transaction_id = $payment_intent->id;
+        $currency = $payment_intent->currency;
+        $order_number = $payment_intent->metadata->order_id;
+        
+            return view('frontend.payment.stripe',compact('data','cartTotal','intent','payment_type','transaction_id','currency','order_number','total_amount'));
         }
         elseif($request->payment_method == 'card'){
             return view('frontend.payment.card',compact('data'));
